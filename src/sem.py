@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 
 import os
-import hashlib
-import json
+import hashlib, json, unicode
 
 def __init_():
     pass
@@ -30,10 +29,11 @@ class Sem(object):
         for i in templist:
             value = self.generateHash(i[0])
             if value in self.hashgraph:
-                tmp = self.hashgraph[value] + i[1]
-                self.hashgraph[value] = tmp
+                tmp = self.hashgraph[value]['dirs'] + i[1]
+                self.hashgraph[value] = { 'dirs':tmp}
             else:
-                self.hashgraph[value] = i[1]
+                self.hashgraph[value] = { 'dirs':i[1]}
+        self.hashgraph = self.byteify(self.hashgraph)
 
     def recursiveRead(self, path):
         ilist = []
@@ -59,8 +59,19 @@ class Sem(object):
     
     def write_to_disk(self, path):
         with open(path, 'w') as f:
-            json.dump(self.hashgraph, f)
+            json.dump(self.hashgraph, f) #ensure_ascii=True)
     
     def read_from_disk(self, path):
         with open(path, 'r') as f:
             self.hashgraph = json.load(f)
+
+#https://stackoverflow.com/questions/956867/how-to-get-string-objects-instead-of-unicode-from-json
+    def byteify(self, input):
+        if isinstance(input, dict):
+            return {self.byteify(key): self.byteify(value) for key, value in input.iteritems()}
+        elif isinstance(input, list):
+            return [self.byteify(element) for element in input]
+        elif isinstance(input, unicode):
+            return input.encode('utf-8')
+        else:
+            return input
