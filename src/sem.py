@@ -1,15 +1,17 @@
 #!/usr/bin/python3
 
 import os
-import hashlib, json, unicode
+import hashlib, json
 
 def __init_():
     pass
 
+AUTOCHECK = False
+
 class Sem(object):
     
     def __init__(self):
-        self.dirs = []
+        self.dirs = ['/run/media/bing/stuff/dl']
         self.hashgraph = {} 
         """{
             "hashXXXXX": {
@@ -17,8 +19,9 @@ class Sem(object):
                 "dirs": [location1, location2],
             }
         }"""
-        self.pdflist = []
-
+        if(AUTOCHECK):
+            self.update_database()
+            self.write_to_disk('../myhashmap.json')
     def add_dir(self, d):
         self.dirs.append(d)
     
@@ -30,10 +33,10 @@ class Sem(object):
             value = self.generateHash(i[0])
             if value in self.hashgraph:
                 tmp = self.hashgraph[value]['dirs'] + i[1]
-                self.hashgraph[value] = { 'dirs':tmp}
+                self.hashgraph[value] = { 'dirs':tmp, 'info': { 'name': i[0]}}
             else:
-                self.hashgraph[value] = { 'dirs':i[1]}
-        self.hashgraph = self.byteify(self.hashgraph)
+                self.hashgraph[value] = { 'dirs':i[1], 'info': { 'name': i[0]}}
+        #self.hashgraph = self.byteify(self.hashgraph)
 
     def recursiveRead(self, path):
         ilist = []
@@ -64,14 +67,25 @@ class Sem(object):
     def read_from_disk(self, path):
         with open(path, 'r') as f:
             self.hashgraph = json.load(f)
+    def get_hashgraph(self):
+        return self.hashgraph
+
+
+    # def save_config(self):
+    #     with open('../setting.json', 'w') as f:
+    #         json.dump(self.config, f)
+    
+    # def restore_config(self):
+    #     with open('../setting.json', 'r') as f:
+    #         self.config = json.load(f)
 
 #https://stackoverflow.com/questions/956867/how-to-get-string-objects-instead-of-unicode-from-json
-    def byteify(self, input):
-        if isinstance(input, dict):
-            return {self.byteify(key): self.byteify(value) for key, value in input.iteritems()}
-        elif isinstance(input, list):
-            return [self.byteify(element) for element in input]
-        elif isinstance(input, unicode):
-            return input.encode('utf-8')
-        else:
-            return input
+    # def byteify(self, input):
+    #     if isinstance(input, dict):
+    #         return {self.byteify(key): self.byteify(value) for key, value in input.iteritems()}
+    #     elif isinstance(input, list):
+    #         return [self.byteify(element) for element in input]
+    #     elif isinstance(input, unicode):
+    #         return input.encode('utf-8')
+    #     else:
+    #         return input
