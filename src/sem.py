@@ -6,24 +6,26 @@ import hashlib, json
 def __init_():
     pass
 
-AUTOCHECK = False
+CONFIG = {
+    "hashfile":"myhashmap.json",
+    "autoupdate":False,
+    "fileslocation":['/run/media/bing/stuff/dl']  #put your pdf files location
+    }
 
 class Sem(object):
     
     def __init__(self):
-        self.dirs = ['/run/media/bing/stuff/dl']
-        self.hashgraph = {} 
+        self.dirs = CONFIG["fileslocation"]
+        self.hashgraph = {}
         """{
             "hashXXXXX": {
                 "info": { "name": myname, "blocked":False, "fav":True },
                 "dirs": [location1, location2],
             }
         }"""
-        if(AUTOCHECK):
+        if(CONFIG["autoupdate"]) or not os.path.isfile(CONFIG["hashfile"]):
             self.update_database()
             self.write_to_disk('../myhashmap.json')
-    def add_dir(self, d):
-        self.dirs.append(d)
     
     def update_database(self):
         templist = []
